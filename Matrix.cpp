@@ -49,15 +49,7 @@ Matrix& Matrix::operator+=(const Matrix& M) {
 
 Matrix Matrix::operator+(const Matrix& M) const{
     Matrix N = Matrix(size);
-    if(size==M.size){
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                N.setElem(getElem(i,j)+M(i,j),i,j);
-        return N;
-    }else{
-        throw std::invalid_argument("Matrices of different sizes cannot be summed");
-    }
-    
+    return N+=M;    
 }
 
 Matrix& Matrix::operator*=(const Matrix& M) {
@@ -100,11 +92,7 @@ Matrix& Matrix::operator*=(const double a) {
 
 Matrix Matrix::operator*(const double a) const{
     Matrix N = Matrix(size);
-    for (int i = 0; i < size; i++) 
-        for (int j = 0; j < size; j++)
-            N.setElem(getElem(i,j)*a,i,j);
-    return N; // dereferencing!
-    //TODO lhs as well?
+    return N*=a;
 }
 
 Matrix Matrix::Mexp(int tol=18)const{
@@ -234,12 +222,12 @@ Matrix Matrix::Mexp(int tol=18)const{
     return Mexp;
 }
 
-double Matrix::operator()(int i, int j) const{ //retrieve element
-    return getElem(i,j);
-}
-
 double Matrix::getElem(int i, int j) const{
     return elems[i+j*size];
+}
+
+double Matrix::operator()(int i, int j) const{ //retrieve element
+    return getElem(i,j);
 }
 
 double Matrix::norm() const{

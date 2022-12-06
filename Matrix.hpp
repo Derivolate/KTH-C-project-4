@@ -8,6 +8,7 @@ class Matrix {
         int size;
         // static int factorial(const int);
     public:
+        //TODO add support for rectangular matrixces
         Matrix();
         Matrix(int m);                          //Constructor of empty matrix with dimension m by m
         Matrix(const Matrix&);                  //Copy constrctor
@@ -29,5 +30,4 @@ class Matrix {
         void fillMatrix(double); //Fill the matrix with random numbers
         int getSize() const;
 };
-#include "Matrix.cpp"
 #endif

@@ -24,10 +24,17 @@ Domain::~Domain() {
 	}
 }
 
+int Domain::get_m(){return m_;}
+int Domain::get_n(){return n_;}
+
+double* Domain::get_x(){return x_;}
+double* Domain::get_y(){return y_;}
+
 inline double Domain::phi1(double q){return 1-q;}
 inline double Domain::phi2(double q){return q;}
-	
-void Domain::generate_grid(int m, int n, int c = 1){
+
+
+void Domain::generateGrid(int m, int n, int c = 1){
 	if(m<1 || n<1)	{
 		std::cerr << "Grid size cannot be smaller than 1 in any dimension" << std::endl;
 		exit(1);
@@ -72,7 +79,7 @@ void Domain::generate_grid(int m, int n, int c = 1){
 	}
 }
 
-void Domain::print_grid(bool bin, bool ascii, bool term, std::string path){
+void Domain::printGrid(bool bin, bool ascii, bool term, std::string path){
 	std::ofstream strm("outfile.txt");
 	for(int ind = 0; ind<n_*m_; ++ind){
 		if (ascii)
