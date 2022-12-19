@@ -2,35 +2,44 @@
 #include <stdexcept>
 #include "Matrix.hpp"
 
-Matrix::Matrix() : size(-1){}
+Matrix::Matrix() : size(Point<int>(-1,-1)),elems(nullptr){}
 
-Matrix::Matrix(int m) :size(m) {//Initialise an identity matrix
-    elems = new double[size*size];
-    for (int i = 0; i < size; i++) {//per row
-        for (int j = 0; j < size; j++) {//per column
+Matrix::Matrix(int m, int n) :Matrix(Point<int>(m,n!=-1?n:m)) {}
+
+Matrix::~Matrix(){
+    if(getm()>0 || getn()>0)
+    {
+        delete[]elems;
+    }
+}
+
+Matrix::Matrix(Point<int> _size) :size(_size) {//Initialise an identity matrix
+    elems = new double[getm()*getn()];
+    for (int j(0); j < getn(); ++j){
+        for (int i(0); i < getm(); ++i){
             if (i==j){
-                elems[i+j*size] = 1;
+                elems[i+j*getm()] = 1;
             }
             else{
-                elems[i+j*size] = 0;
+                elems[i+j*getm()] = 0;
             }
         }
     }
 }
 
 Matrix::Matrix(const Matrix& M): size(M.size) { 
-    elems = new double[size*size];
-    for (int i = 0; i < size; i++) //per row
-        for (int j = 0; j < size; j++) //per column
+    elems = new double[getn()*getm()];
+    for (int j(0); j < getn(); ++j)
+        for (int i(0); i < getm(); ++i)
             setElem(M(i,j),i,j);
 }
 
 Matrix& Matrix::operator=(const Matrix& M) {
     if (this != &M) {
         size = M.size;
-        elems = new double[size*size];
-        for (int i = 0; i < size; i++) //per row
-            for (int j = 0; j < size; j++) //per column
+        elems = new double[getn()*getm()];
+        for (int j(0); j < getn(); ++j)
+            for (int i(0); i < getm(); ++i)
                 setElem(M(i,j),i,j);
     }
     return *this; // dereferencing!
@@ -38,8 +47,8 @@ Matrix& Matrix::operator=(const Matrix& M) {
 
 Matrix& Matrix::operator+=(const Matrix& M) {
     if(size==M.size){
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
+        for (int j(0); j < getn(); ++j)
+            for (int i(0); i < getm(); ++i)
                 setElem(M(i,j)+getElem(i,j),i,j);
         return *this;
     }else{
@@ -52,30 +61,30 @@ Matrix Matrix::operator+(const Matrix& M) const{
     return N+=M;    
 }
 
-Matrix& Matrix::operator*=(const Matrix& M) {
-    Matrix N = Matrix(size);
-    double elem(0);
-    if(size==M.size){
-        for (int i = 0; i < size; i++){
-            for (int j = 0; j < size; j++){
-                for (int k = 0; k < size; k++){
-                    elem += getElem(i,k)*M(k,j);
-                }
-                N.setElem(elem,i,j);
-                elem = 0;
-            }
-        }
-        *this = N;
-        return *this;
-    }else{
-        throw std::invalid_argument("Multiplication of different sized matrices is not implemented");
-    }
-}
+// Matrix& Matrix::operator*=(const Matrix& M) {
+//     Matrix N = Matrix(size);
+//     double elem(0);
+//     if(size==M.size){
+//         for (int i = 0; i < getn(); i++){
+//             for (int j = 0; j < getm(); j++){
+//                 for (int k = 0; k < size; k++){
+//                     elem += getElem(i,k)*M(k,j);
+//                 }
+//                 N.setElem(elem,i,j);
+//                 elem = 0;
+//             }
+//         }
+//         *this = N;
+//         return *this;
+//     }else{
+//         throw std::invalid_argument("Multiplication of different sized matrices is not implemented");
+//     }
+// }
 
 Matrix& Matrix::operator%=(const Matrix& M) {
     if(size==M.size){
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
+        for (int j(0); j < getn(); ++j)
+            for (int i(0); i < getm(); ++i)
                 setElem(getElem(i,j)*M(i,j),i,j);
         return *this;
     }else{
@@ -84,8 +93,8 @@ Matrix& Matrix::operator%=(const Matrix& M) {
 }
 
 Matrix& Matrix::operator*=(const double a) {
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int j(0); j < getn(); ++j)
+        for (int i(0); i < getm(); ++i)
             setElem(getElem(i,j)*a,i,j);
     return *this; // dereferencing!
 }
@@ -95,135 +104,8 @@ Matrix Matrix::operator*(const double a) const{
     return N*=a;
 }
 
-Matrix Matrix::Mexp(int tol=18)const{
-    //Pick a scaling factor and series length based on the tolerance and norm from the pre-calculated table
-    //Source: Nineteen Dubious Ways to Compute the Exponential of a Matrix, Twenty-Five Years Later; Cleve Moler and Charles Van Loan
-    double norm2 = norm(); // Get the 2-norm
-    int series_length;
-    int scaling_pow;
-    if (tol < 4){
-        if(norm2 < 0.01){
-            series_length = 1;
-            scaling_pow = 0;
-        }else if(norm2 < 0.1){
-            series_length = 3;
-            scaling_pow = 0;
-        }else if(norm2 < 1){
-            series_length = 5;
-            scaling_pow = 1;
-        }else if(norm2 < 10){
-            series_length = 4;
-            scaling_pow = 5;
-        }else if(norm2 < 100){
-            series_length = 4;
-            scaling_pow = 8;
-        }else{
-            series_length = 5;
-            scaling_pow = 11;
-        }
-    }else if(tol < 7){
-        if(norm2 < 0.01){
-            series_length = 2;
-            scaling_pow = 1;
-        }else if(norm2 < 0.1){
-            series_length = 4;
-            scaling_pow = 0;
-        }else if(norm2 < 1){
-            series_length = 7;
-            scaling_pow = 1;
-        }else if(norm2 < 10){
-            series_length = 6;
-            scaling_pow = 5;
-        }else if(norm2 < 100){
-            series_length = 5;
-            scaling_pow = 9;
-        }else{
-            series_length = 7;
-            scaling_pow = 11;
-        }
-    }else if(tol < 10){
-        if(norm2 < 0.01){
-            series_length = 3;
-            scaling_pow = 1;
-        }else if(norm2 < 0.1){
-            series_length = 4;
-            scaling_pow = 2;
-        }else if(norm2 < 1){
-            series_length = 6;
-            scaling_pow = 3;
-        }else if(norm2 < 10){
-            series_length = 8;
-            scaling_pow = 5;
-        }else if(norm2 < 100){
-            series_length = 7;
-            scaling_pow = 9;
-        }else{
-            series_length = 6;
-            scaling_pow = 13;
-        }
-    }else if(tol < 13){
-        if(norm2 < 0.01){
-            series_length = 4;
-            scaling_pow = 1;
-        }else if(norm2 < 0.1){
-            series_length = 4;
-            scaling_pow = 4;
-        }else if(norm2 < 1){
-            series_length = 8;
-            scaling_pow = 3;
-        }else if(norm2 < 10){
-            series_length = 7;
-            scaling_pow = 7;
-        }else if(norm2 < 100){
-            series_length = 9;
-            scaling_pow = 9;
-        }else{
-            series_length = 8;
-            scaling_pow = 13;
-        }
-    }else{
-        if(norm2 < 0.01){
-            series_length = 5;
-            scaling_pow = 1;
-        }else if(norm2 < 0.1){
-            series_length = 5;
-            scaling_pow = 4;
-        }else if(norm2 < 1){
-            series_length = 7;
-            scaling_pow = 5;
-        }else if(norm2 < 10){
-            series_length = 9;
-            scaling_pow = 7;
-        }else if(norm2 < 100){
-            series_length = 10;
-            scaling_pow = 10;
-        }else{
-            series_length = 8;
-            scaling_pow = 14;
-        }
-    }
-    
-    double factorial = 1; 
-    Matrix A = *this;
-    series_length += 5;
-    scaling_pow+=5;
-    A *= 1/pow(2,scaling_pow);
-    Matrix scaled = A;                      //Temporary storage for matrix multiplications
-    Matrix Mexp(size);                      //Initialized as identity matrix, will be returned as result
-    Mexp = Mexp+A*(1/factorial);            //Taking this out of the loop saves one matrix multiplication
-    for(int i = 2; i<=series_length;i++){
-        factorial*=i;
-        A%=scaled;
-        Mexp = Mexp+ A*(1/factorial);
-    }
-    for(int i = 1; i<= scaling_pow;i++){
-        Mexp*=Mexp;
-    }
-    return Mexp;
-}
-
 double Matrix::getElem(int i, int j) const{
-    return elems[i+j*size];
+    return elems[i+getm()*j];
 }
 
 double Matrix::operator()(int i, int j) const{ //retrieve element
@@ -232,8 +114,8 @@ double Matrix::operator()(int i, int j) const{ //retrieve element
 
 double Matrix::norm() const{
     double norm(0);
-    for (int i = 0; i < size; i++) 
-        for (int j = 0; j < size; j++)
+    for (int j(0); j < getn(); ++j)
+        for (int i(0); i < getm(); ++i)
             norm+= getElem(i,j)*getElem(i,j);
     return std::sqrt(norm);
 }
@@ -243,21 +125,21 @@ double Matrix::norm(const Matrix& M){
 }
 
 void Matrix::setElem(double val ,int i, int j){
-    elems[i+j*size] = val;
+    elems[i+j*getm()] = val;
 }
 
 void Matrix::printMatrix() const { 
-    for (int i = 0; i < size; i++){
-        for (int j = 0; j < size; j++){
-            cout << elems[i + j*size] <<" ";
+    for (int i(0); i < getm(); ++i){
+        for (int j(0); j < getn(); ++j){
+            cout << elems[i + j*getm()] <<" ";
         }
         cout << endl;
     }
 }
 
 void Matrix::fillMatrix(double maxVal = 10) {
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int j(0); j < getn(); ++j)
+        for (int i(0); i < getm(); ++i)
             setElem(((double)rand()/RAND_MAX)*maxVal, i, j);
 }
 
@@ -265,6 +147,14 @@ double* Matrix::getMat() const{
     return elems;
 }
 
-int Matrix::getSize() const{
+Point<int> Matrix::getSize() const{
     return size;
+}
+
+int Matrix::getm() const{
+    return (int)size.Y();
+}
+
+int Matrix::getn() const{
+    return (int)size.X();
 }

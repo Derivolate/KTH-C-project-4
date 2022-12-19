@@ -4,8 +4,6 @@
 
 Curvebase::Curvebase(double a, double b, bool dir) : pmin(a), pmax(b), rev(dir) {}
 
-Curvebase::~Curvebase(){}
-
 void Curvebase::set_tol(double tol)
 {
     tollerance = tol;

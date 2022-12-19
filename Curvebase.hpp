@@ -4,7 +4,6 @@
 class Curvebase {
 	public:
         Curvebase(double, double, bool);
-		virtual ~Curvebase();
 		
 		double x(double); //Function of s, the arc length parameter
 		double y(double);
