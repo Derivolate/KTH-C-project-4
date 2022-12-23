@@ -18,9 +18,9 @@ class GridFunction {
         GridFunction& operator*=(const GridFunction&) const;  //Pointwise grid multiplication assignment operator
         // GridFunction& operator*(const GridFunction&) const;  //Pointwise grid multiplication operator
         
-        GridFunction& Dx() const;    //X derivative
-        GridFunction& Dy() const;    //Y derivative
-        GridFunction& Grad() const;  //Gradient function
+        void Dx();    //X derivative
+        void Dy();    //Y derivative
+        void Grad();  //Gradient function
         
         static GridFunction& Grad(const GridFunction&, const GridFunction&); //Overloaded option for the gradient in case the derivatives in X and Y are already available
         void printFkt();

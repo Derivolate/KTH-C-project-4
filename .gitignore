@@ -1,1 +1,10 @@
 *.exe
+Main.cpp
+Main.dSYM/Contents/Resources/DWARF/Main
+outfile.txt
+outfileX.bin
+outfileY.bin
+.vscode/tasks.json
+Main.dSYM/Contents/Info.plist
+Main
+.vscode/settings.json

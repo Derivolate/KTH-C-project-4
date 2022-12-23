@@ -51,25 +51,25 @@ void Domain::generateGrid(int m, int n, int c = 1){
 	
 	double h1(1.0/(n-1)), h2(1.0/(m-1)); // force floating point division
 
-	for(int i(0); i<n; ++i){ //Horizontal index, indicates the column
-		for(int j(0); j<m; ++j){ //Vertical index, indicates the row
+	for(int i(0); i<m; ++i){ //Horizontal index, indicates the column
+		for(int j(0); j<n; ++j){ //Vertical index, indicates the row
 			
 			if (c == 1) { // equidistant s
-				xi = i*h1;
-				nu = j*h2;
+				xi = j*h1;
+				nu = i*h2;
 			} 
 			else if (c==2) { // stretched s
-				xi = i*h1;
-				nu = 1+(tanh(3*((j*h2)-1)))/tanh(3);
+				xi = j*h1;
+				nu = 1+(tanh(3*((i*h2)-1)))/tanh(3);
 			} 
 
-			x_[j+i*m] = phi1(xi)*sides[3]->x(nu)+phi2(xi)*sides[1]->x(nu)
+			x_[i+j*n] = phi1(xi)*sides[3]->x(nu)+phi2(xi)*sides[1]->x(nu)
 						+ phi1(nu)*sides[0]->x(xi) + phi2(nu)*sides[2]->x(xi)
 						- phi1(xi)*phi1(nu)*sides[0]->x(0)
 						- phi1(xi)*phi2(nu)*sides[2]->x(0)
 						- phi2(xi)*phi1(nu)*sides[0]->x(1)
 						- phi2(xi)*phi2(nu)*sides[2]->x(1);
-			y_[j+i*m] = phi1(xi)*sides[3]->y(nu)+phi2(xi)*sides[1]->y(nu)
+			y_[i+j*n] = phi1(xi)*sides[3]->y(nu)+phi2(xi)*sides[1]->y(nu)
 						+ phi1(nu)*sides[0]->y(xi) + phi2(nu)*sides[2]->y(xi)
 						- phi1(xi)*phi1(nu)*sides[0]->y(0)
 						- phi1(xi)*phi2(nu)*sides[2]->y(0)
