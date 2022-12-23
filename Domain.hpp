@@ -3,25 +3,26 @@
 
 #include "Curvebase.hpp"
 #include <string>
+#include "Point.hpp"
 
 class Domain{
 	public:
 		Domain(Curvebase&, Curvebase&, Curvebase&, Curvebase&, double =  1e-12);
-		Domain(const Domain&);
-		~Domain();
+		Domain(const Domain&); //Copy constructor
+		~Domain(); //Destructor
 
-		Domain& operator =(Domain&); //Assignment operator
+		Domain& operator =(Domain&); //Copy assignment
 	
 		void generateGrid(int, int, int); // pass m*n grid and interpolation option. 1-linear, 2-stretched vertical indices
-		void printGrid(bool,bool,bool,std::string ="");
-		double* get_x();
-		double* get_y();	
-		int get_n();
-		int get_m();
+		void printGrid(bool,bool,bool,std::string ="") const;
+		Point<double>* getGrid() const;
+		Point<int> getSize() const;	
 	private:
 		Curvebase * sides[4]; //TODO implement smart pointer
-        double * x_ = nullptr, * y_ = nullptr;
-        int n_ = 0, m_ = 0;
+		Point<double> * grid = nullptr;
+        // double * x_ = nullptr, * y_ = nullptr;
+		Point<int> size;
+        // int n_ = 0, m_ = 0;
 		double tol;
 		double phi1(double); //transition function for grid generation phix(0) = 1, phix(1) = 0
 		double phi2(double); //transition function for grid generation phiy(1) = 1, phix(0) = 0

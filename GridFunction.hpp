@@ -2,17 +2,17 @@
 #define GRIDFUNCTION_HPP
 #include "Matrix.hpp"
 #include "Domain.hpp"
+#include <memory>
 
 class GridFunction {
     public:
-        GridFunction(const GridFunction&);
-        GridFunction(Domain*);
-        virtual ~GridFunction();
+        //Smart pointer can take care on its own of proper copying and deletion. Rule of 0 applies
+        // GridFunction(const GridFunction&) = default;
+        // ~GridFunction() = default;
+        // GridFunction& operator=(const GridFunction&) = default;   //Assignment operator
 
-        // void fill_matrix(); //fills Matrix u with values from u_function 
-        // We don't need this if the constructor already fills up u
+        GridFunction(std::shared_ptr<Domain>);
 
-        GridFunction& operator=(const GridFunction&);   //Assignment operator
         GridFunction& operator+=(const GridFunction&) const;  //Pointwise grid addition assignment operator
         // GridFunction& operator+(const GridFunction&) const;  //Pointwise grid addition operator
         GridFunction& operator*=(const GridFunction&) const;  //Pointwise grid multiplication assignment operator
@@ -24,13 +24,10 @@ class GridFunction {
         
         static GridFunction& Grad(const GridFunction&, const GridFunction&); //Overloaded option for the gradient in case the derivatives in X and Y are already available
         void printFkt();
-
-    protected:
         void fillGrid();
-
     private:
+        std::shared_ptr<Domain> domain;
         Matrix u;
-        Domain *grid; //TODO implement shared_pointer
-        virtual double u_function(double, double) = 0;
+        double u_function(Point<double>);
 }; 
 #endif

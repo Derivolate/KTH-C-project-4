@@ -1,17 +1,21 @@
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
 #include <iostream>
+#include "Point.hpp"
 using namespace std;
 class Matrix {
     private:
         double *elems;
-        int size;
-        // static int factorial(const int);
+        Point<int> size;
+        int getm() const;
+        int getn() const;
     public:
-        //TODO add support for rectangular matrixces
         Matrix();
-        Matrix(int m);                          //Constructor of empty matrix with dimension m by m
+        Matrix(Point<int>);
+        Matrix(int, int = -1);                  //Constructor of empty matrix with dimension m by m
         Matrix(const Matrix&);                  //Copy constrctor
+        ~Matrix();
+
         Matrix& operator=(const Matrix&);       //Assignment operator
         Matrix& operator+=(const Matrix&);      //Element wise addition Assignment
         Matrix operator+(const Matrix&)const;   //Element wise addition
@@ -28,6 +32,6 @@ class Matrix {
         static double norm(const Matrix&);
         void printMatrix() const;
         void fillMatrix(double); //Fill the matrix with random numbers
-        int getSize() const;
+        Point<int> getSize() const;
 };
 #endif
