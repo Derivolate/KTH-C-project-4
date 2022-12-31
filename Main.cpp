@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    Point size = Point(5,5);
+    Point<int> size = Point<int>(5,5);
     Matrix M = Matrix(size);
     Matrix N(M);
     
@@ -42,16 +42,22 @@ int main(int argc, char **argv)
     Vline border4 = Vline(0,1,true,ox,oy,height);
 
     Domain domain = Domain(border1,border2,border3,border4);
-    domain.generateGrid(20,15,1);
-    Domain test1(domain);
-    Domain test2 = domain;
+    domain.generateGrid(5,5,1);
 
 
     std::shared_ptr<Domain> domain_ptr= std::make_shared<Domain>(domain);
 
     GridFunction Fkt = GridFunction(domain_ptr);
-    Fkt.fillGrid();
-    domain.printGrid(true,true,true);
-    Fkt.printFkt();
+    
 
+    std::cout << "------------ Filling Grid --------------" << std::endl;
+    Fkt.fillGrid();
+    GridFunction dFdx = Fkt.Dx();
+    GridFunction dFdy = Fkt.Dy();
+    std::cout << "------------ Printing Grid --------------" << std::endl;
+    domain.printGrid(true,false,false);
+    std::cout << "------------ Printing Function --------------" << std::endl;
+    Fkt.printFkt("u_out.bin");
+    dFdx.printFkt("dx_out.bin");
+    dFdy.printFkt("dy_out.bin");
 }

@@ -1,12 +1,21 @@
 #include "Matrix.hpp"
 #include "Domain.hpp"
 #include "GridFunction.hpp"
+#include <iostream>
+#include <fstream>
 #include <cmath>
 
-GridFunction::GridFunction(std::shared_ptr<Domain> _dom) : domain(_dom),u(_dom->getSize()){}
+GridFunction::GridFunction(std::shared_ptr<Domain> _dom) : domain(_dom),u(_dom->getSize()), phix(_dom->getSize()),phiy(_dom->getSize()){}
 
-void GridFunction::printFkt(){
+void GridFunction::printFkt(std::string file) const{
     u.printMatrix();
+    std::string path = "../MatlabGrid/" + file;
+    const char* str = path.c_str();
+    double size = domain->getSize().X()*domain->getSize().Y();
+	FILE *fu;
+	fu = fopen(str,"wb");
+	fwrite(u.getMat(),sizeof(double),size,fu);
+	fclose(fu);
 }
 
 // This functionality cannot be in the constructor because it calls a virtual function
@@ -15,47 +24,72 @@ void GridFunction::fillGrid(){
     Point<double>* coords = domain->getGrid();
     Point<double> coord;
     double val;
-    for(int i(0);i<u.getSize().Y();++i){
-        for(int j(0);j<u.getSize().X();++j){
-            coord = coords[i+u.getSize().Y()*j];
+    for(int i(0);i<u.getSize().X();++i){
+        for(int j(0);j<u.getSize().Y();++j){
+            coord = coords[i+u.getSize().X()*j];
             val = u_function(coord);
             u.setElem(val,i,j);
+            phix.setElem(coord.X(),i,j);
+            phiy.setElem(coord.Y(),i,j);
         }
     }
+    std::cout << "------- PHIX AND PHIY -------" << std::endl;
+    phix.printMatrix();
+    phiy.printMatrix();
 }
 
-void GridFunction::Dx() {
-    double* x(grid->get_x());
-    double* y(grid->get_y());
-    int m(u.getSize()), n(u.getSize());
-    double h1(1.0/(n-1)), h2(1.0/(m-1));
-    Matrix dxxi(n), dxeta(n), dyxi(n), dyeta(n), duxi(n), dueta(n);
-    for (int i(0); i<m; i++){
-            dxxi.setElem((x[i+2*m] - 4*x[i+m] + 3*x[i])/(3*h1),i,0);
-            dyxi.setElem((y[i+2*m] - 4*y[i+m] + 3*y[i])/(3*h1),i,0);
-            dxxi.setElem((x[i+2*m] - 4*x[i+m] + 3*x[i])/(3*h1),i,n);
-            dyxi.setElem((y[i+2*m] - 4*y[i+m] + 3*y[i])/(3*h1),i,n);
-
-    for (int i(0); i<m; i++){
-        for (int j(0); j<n; j++){
-            if (j == 0){ // Deal with boundary0 
-                dxxi.setElem((x[i+2*m] - 4*x[i+m] + 3*x[i])/(3*h1),i,j);
-                dyxi.setElem((y[i+2*m] - 4*y[i+m] + 3*y[i])/(3*h1),i,j);
-                if (i == 0){
-                    dxeta.setElem((x[i+2] - 4*x[i+1] + 3*x[i])/(3*h2),i,j);
-                    dyeta.setElem((y[i+2] - 4*y[i+1] + 3*y[i])/(3*h2),i,j);
-                }
-                else if (i == m-1){
-                    dxeta.setElem((x[i-2] - 4*x[i-1] + 3*x[i])/(3*h2),i,j);
-                    dyeta.setElem((y[i-2] - 4*y[i-1] + 3*y[i])/(3*h2),i,j);
-                }
-                else{
-                    dxeta.setElem((x[i-2] - 4*x[i-1] + 3*x[i])/(3*h2),i,j);
-                    dyeta.setElem((y[i-2] - 4*y[i-1] + 3*y[i])/(3*h2),i,j);
-                }
-                if
-                u.setElem(dx, i,j);
-            }    
-        }   
+GridFunction GridFunction::Dx() {
+    Point<double>* grid = domain->getGrid();
+    int m(u.getSize().X()), n(u.getSize().Y());
+    GridFunction grdfktn(domain);
+    // corners
+    std::cout<<"====== CORNERS DX ======" << std::endl;
+    grdfktn.u.setElem(assym_<1,0>(0,0),0,0);
+    grdfktn.u.setElem(assym_<-1,0>(0,n),0,n);
+    grdfktn.u.setElem(assym_<1,0>(n,0),m,0);
+    grdfktn.u.setElem(assym_<-1,0>(n,m),n,m);
+    // boundary 1 and 3
+    std::cout<<"====== BOUNDARY 1,3 ======" << std::endl;
+    for(int i(1); i < m-1; i++){
+        grdfktn.u.setElem(assym_<1,0>(i,0),i,0);
+        grdfktn.u.setElem(assym_<-1,0>(i,n),i,n);
     }
+    std::cout<<"====== REST DX ======" << std::endl;
+    for(int i(0); i < m; i++){  
+              for(int j(1); j < n-1; j++){
+                    grdfktn.u.setElem(center_<1,0>(i,j),i,j);
+        }
+    }
+    return(grdfktn);
+}
+
+double GridFunction::u_function(Point<double> p){
+    double x(p.X()),y(p.Y());
+    // return(sin(pow(x/10,2)*cos(x/10)+y));
+    return(x);
+}
+
+GridFunction GridFunction::Dy() {
+    Point<double>* grid = domain->getGrid();
+    int m(u.getSize().X()), n(u.getSize().Y());
+    GridFunction grdfktn(domain);
+    // corners
+    std::cout<<"====== CORNERS DY ======" << std::endl;
+    grdfktn.u.setElem(assym_<0,1>(0,0),0,0);
+    grdfktn.u.setElem(assym_<0,-1>(m,0),m,0);
+    grdfktn.u.setElem(assym_<0,1>(0,n),0,n);
+    grdfktn.u.setElem(assym_<0,-1>(n,m),n,m);
+    // boundary 0 and 2
+    std::cout<<"====== BOUNDARY 0,2 ======" << std::endl;
+    for(int j(1); j < m-1; j++){
+        grdfktn.u.setElem(assym_<0,1>(0,j),0,j);
+        grdfktn.u.setElem(assym_<0,-1>(m,j),m,j);
+    }
+    std::cout<<"====== REST DY ======" << std::endl;
+    for(int i(0); i < m-1; i++){  
+              for(int j(1); j < n; j++){
+                    grdfktn.u.setElem(center_<0,1>(i,j),i,j);
+        }
+    }
+    return(grdfktn);
 }
