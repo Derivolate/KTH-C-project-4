@@ -50,14 +50,17 @@ int main(int argc, char **argv)
     GridFunction Fkt = GridFunction(domain_ptr);
     
 
-    std::cout << "------------ Filling Grid --------------" << std::endl;
+    std::cout << "============ Filling Grid ============" << std::endl;
     Fkt.fillGrid();
     GridFunction dFdx = Fkt.Dx();
     GridFunction dFdy = Fkt.Dy();
-    std::cout << "------------ Printing Grid --------------" << std::endl;
+    std::cout << "============ Printing Grid ============" << std::endl;
     domain.printGrid(true,false,false);
-    std::cout << "------------ Printing Function --------------" << std::endl;
+    std::cout << "============ Printing Function ============" << std::endl;
+    std::cout << "----------- Grid Function -----------" << std::endl;
     Fkt.printFkt("u_out.bin");
+    std::cout << "----------- DX -----------" << std::endl;
     dFdx.printFkt("dx_out.bin");
+    std::cout << "----------- DY -----------" << std::endl;
     dFdy.printFkt("dy_out.bin");
 }

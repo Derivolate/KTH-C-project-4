@@ -129,12 +129,15 @@ void Matrix::setElem(double val ,int i, int j){
 }
 
 void Matrix::printMatrix() const { 
+    cout << endl;
     for (int i(0); i < getm(); ++i){
         for (int j(0); j < getn(); ++j){
             cout << elems[i + j*getm()] <<" ";
         }
         cout << endl;
     }
+    cout << endl;
+
 }
 
 void Matrix::fillMatrix(double maxVal = 10) {

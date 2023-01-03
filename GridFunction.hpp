@@ -29,66 +29,119 @@ class GridFunction {
         std::shared_ptr<Domain> domain;
         Matrix u;
         Matrix phix, phiy;
+
         double u_function(Point<double>);
 
-        template<int dx, int dy> double center_(int i, int j);
-        template<int dx, int dy> double assym_(int i, int j);
+        template<int dx, int dy> double center_(int i, int j, Matrix const & fctn);
+        template<int dx, int dy> double assym_(int i, int j, Matrix const & fctn);
+
+        template<int dx, int dy> double face_(int i, int j);
+        template<int dx, int dy, int dxi, int deta> double vertex_(int i, int j);
+        template<int dx, int dy, int dxi, int deta> double edge_(int i, int j);
+
+
         // TODO template<int dx, int dy> double ghost_(int i, int j);
 
 }; 
 
 // ----------------------------------
 
-// template<int dx, int dy> double GridFunction::center_(int i, int j, Matrix const & fnctn) {
-// }
-
-// template<int dx> double GridFunction::center_(int i, int j, Matrix const & fnctn) {
-// }
-
-template<int dx, int dy> double GridFunction::center_(int i, int j){
-    if (dx*dy != 0){
-        std::cout << "Only x or y may be given as direction. No inbetween" << std::endl;
-        return(0);
-    }
-    const double deta = 1.0/(domain->getSize().X()-1);
-    const double dxi = 1.0/(domain->getSize().Y()-1);
-    const double dudeta = (u.getElem(i+1,j) - u.getElem(i-1,j))*0.5/deta;
-    const double dudxi = (u.getElem(i,j+1) - u.getElem(i,j-1))*0.5/dxi;
-    const double dphixdxi = (phix.getElem(i,j+1) - phix.getElem(i,j-1))*0.5/dxi;
-    const double dphiydxi = (phiy.getElem(i,j+1) - phiy.getElem(i,j-1))*0.5/dxi;
-    const double dphixdeta = (phix.getElem(i+1,j) - phix.getElem(i-1,j))*0.5/deta;
-    const double dphiydeta = (phiy.getElem(i+1,j) - phiy.getElem(i-1,j))*0.5/deta;
-    const double detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
-    std::cout << "Element: [" << i << "," << j << "] direction: center[" << dx << "," << dy << "] phiy.getElem: " << phiy.getElem(i+1,j) << std::endl;
-    std::cout<< "dxi: " << dxi <<"dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
-    if (detJ == 0){
-        std::cout << "Matrix is singular, cannot calculate derivative" << std::endl;
-        return(0);
-    }
-    return((1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta)));
+template<int dx, int dy> double GridFunction::center_(int i, int j, Matrix const & fctn) {
+    if (!(dx || dy)){return 0;}
+    double const d = dy/(domain->getSize().X()-1.0) + dx/(domain->getSize().Y()-1.0);
+    return(fctn.getElem(i+dy,j+dx) - fctn.getElem(i-dy,j-dx))/(2*d);
 }
 
-template<int dx, int dy> double GridFunction::assym_(int i, int j){
-    if (dx*dy != 0){
-        std::cout << "Only x or y may be given as direction. No inbetween" << std::endl;
-        return(0);
-    }
-    const double deta = 1.0/(domain->getSize().X()-1);
-    const double dxi = 1.0/(domain->getSize().Y()-1);
-    const double dudeta = ((u.getElem(i+2*dy,j) - 4*u.getElem(i+dy,j)) + 3*u.getElem(i,j))/(3*deta);
-    const double dudxi = ((u.getElem(i,j+2*dx) - 4*u.getElem(i,j+dx)) + 3*u.getElem(i,j))/(3*dxi);
-    const double dphixdxi = ((phix.getElem(i,j+2*dx) - 4*phix.getElem(i,j+dx)) + 3*phix.getElem(i,j))/(3*dxi);
-    const double dphiydxi = ((phiy.getElem(i,j+2*dx) - 4*phiy.getElem(i,j+dx)) + 3*phiy.getElem(i,j))/(3*dxi);
-    const double dphixdeta = ((phix.getElem(i+2*dy,j) - 4*phix.getElem(i+dy,j)) + 3*phix.getElem(i,j))/(3*deta);
-    const double dphiydeta = ((phiy.getElem(i+2*dy,j) - 4*phiy.getElem(i+dy,j)) + 3*phiy.getElem(i,j))/(3*deta);
-    const double detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
-    std::cout << "Element: [" << i << "," << j << "] direction: center[" << dx << "," << dy << "] phiy.getElem: " << phiy.getElem(i+1,j) << std::endl;
-    std::cout<< "dxi: " << dxi <<"dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
-    if (detJ == 0){
-        std::cout << "Matrix is singular, cannot calculate derivative" << std::endl;
-        return(0);
-    }
-    return(1/detJ * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta)));
+template<int dx, int dy> double GridFunction::assym_(int i, int j, Matrix const & fctn) {
+    if (!(dx || dy)){return 0;}
+    double const d = dy/(domain->getSize().X()-1.0) + dx/(domain->getSize().Y()-1.0);
+    return(fctn.getElem(i+2*dy,j+2*dx) - 4*fctn.getElem(i+dy,j+dx) + 3*fctn.getElem(i,j))/(3*d);
 }
+
+template<int dx, int dy, int dxi, int deta> double GridFunction::vertex_(int i, int j){
+    double dudxi, dudeta, dphixdxi, dphiydxi, dphixdeta, dphiydeta, detJ;
+    dudeta = assym_<0,deta>(i,j, u);
+    dudxi = assym_<dxi,0>(i,j, u);
+    dphixdxi = assym_<dxi,0>(i,j, phix);
+    dphiydxi = assym_<dxi,0>(i,j, phiy);
+    dphixdeta = assym_<0,deta>(i,j, phix);
+    dphiydeta = assym_<0,deta>(i,j, phiy);
+    detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+    std::cout << "Vertex Element: [" << i << "," << j << "] direction: dxi,deta [" << dxi << "," << deta << "]" << std::endl;
+    std::cout << "dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
+    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta));
+}
+
+template<int dx, int dy, int dxi, int deta> double GridFunction::edge_(int i, int j){
+    double dudxi, dudeta, dphixdxi, dphiydxi, dphixdeta, dphiydeta, detJ;
+    dudeta = assym_<0,deta>(i,j,u) * abs(deta) + center_<0,1>(i,j,u) * (1-abs(deta));
+    dudxi = assym_<dxi,0>(i,j, u)*abs(dxi) + center_<1,0>(i,j,u)* (1-abs(dxi));
+    dphixdxi = assym_<dxi,0>(i,j, phix) * abs(dxi) + center_<1,0>(i,j, phix)* (1-abs(dxi));
+    dphiydxi = assym_<dxi,0>(i,j, phiy) * abs(dxi) + center_<1,0>(i,j, phiy)* (1-abs(dxi));
+    dphixdeta = assym_<0,deta>(i,j, phix)* abs(deta) + center_<0,1>(i,j, phix)* (1-abs(deta));
+    dphiydeta = assym_<0,deta>(i,j, phiy)* abs(deta) + center_<0,1>(i,j, phiy)* (1-abs(deta));
+    detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+    std::cout << "Edge Element: [" << i << "," << j << "] direction: dxi,deta [" << dxi << "," << deta << "]" << std::endl;
+    std::cout << "dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
+    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta));
+}
+
+template<int dx, int dy> double GridFunction::face_(int i, int j){
+    double dudxi, dudeta, dphixdxi, dphiydxi, dphixdeta, dphiydeta, detJ;
+    dudeta = center_<0,1>(i,j, u);
+    dudxi = center_<1,0>(i,j, u);
+    dphixdxi = center_<1,0>(i,j, phix);
+    dphiydxi = center_<1,0>(i,j, phiy);
+    dphixdeta = center_<0,1>(i,j, phix);
+    dphiydeta = center_<0,1>(i,j, phiy);
+    detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta));  
+}
+
+// template<int dx, int dy> double GridFunction::center_(int i, int j){
+//     if (dx*dy != 0){
+//         std::cout << "Only x or y may be given as direction. No inbetween" << std::endl;
+//         return(0);
+//     }
+//     const double deta = 1.0/(domain->getSize().X()-1);
+//     const double dxi = 1.0/(domain->getSize().Y()-1);
+//     const double dudeta = (u.getElem(i+1,j) - u.getElem(i-1,j))*0.5/deta;
+//     const double dudxi = (u.getElem(i,j+1) - u.getElem(i,j-1))*0.5/dxi;
+//     const double dphixdxi = (phix.getElem(i,j+1) - phix.getElem(i,j-1))*0.5/dxi;
+//     const double dphiydxi = (phiy.getElem(i,j+1) - phiy.getElem(i,j-1))*0.5/dxi;
+//     const double dphixdeta = (phix.getElem(i+1,j) - phix.getElem(i-1,j))*0.5/deta;
+//     const double dphiydeta = (phiy.getElem(i+1,j) - phiy.getElem(i-1,j))*0.5/deta;
+//     const double detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+//     std::cout << "Element: [" << i << "," << j << "] direction: center[" << dx << "," << dy << "] phiy.getElem: " << phiy.getElem(i+1,j) << std::endl;
+//     std::cout<< "dxi: " << dxi <<"dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
+//     if (detJ == 0){
+//         std::cout << "Matrix is singular, cannot calculate derivative" << std::endl;
+//         return(0);
+//     }
+//     return((1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta)));
+// }
+
+// template<int dx, int dy> double GridFunction::assym_(int i, int j){
+//     if (dx*dy != 0){
+//         std::cout << "Only x or y may be given as direction. No inbetween" << std::endl;
+//         return(0);
+//     }
+//     const double deta = 1.0/(domain->getSize().X()-1);
+//     const double dxi = 1.0/(domain->getSize().Y()-1);
+//     const double dudeta = ((u.getElem(i+2*dy,j) - 4*u.getElem(i+dy,j)) + 3*u.getElem(i,j))/(3*deta);
+//     const double dudxi = ((u.getElem(i,j+2*dx) - 4*u.getElem(i,j+dx)) + 3*u.getElem(i,j))/(3*dxi);
+//     const double dphixdxi = ((phix.getElem(i,j+2*dx) - 4*phix.getElem(i,j+dx)) + 3*phix.getElem(i,j))/(3*dxi);
+//     const double dphiydxi = ((phiy.getElem(i,j+2*dx) - 4*phiy.getElem(i,j+dx)) + 3*phiy.getElem(i,j))/(3*dxi);
+//     const double dphixdeta = ((phix.getElem(i+2*dy,j) - 4*phix.getElem(i+dy,j)) + 3*phix.getElem(i,j))/(3*deta);
+//     const double dphiydeta = ((phiy.getElem(i+2*dy,j) - 4*phiy.getElem(i+dy,j)) + 3*phiy.getElem(i,j))/(3*deta);
+//     const double detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+//     std::cout << "Element: [" << i << "," << j << "] direction: center[" << dx << "," << dy << "] phiy.getElem: " << phiy.getElem(i+1,j) << std::endl;
+//     std::cout<< "dxi: " << dxi <<"dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
+//     if (detJ == 0){
+//         std::cout << "Matrix is singular, cannot calculate derivative" << std::endl;
+//         return(0);
+//     }
+//     return(1/detJ * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta)));
+// }
 
 #endif
