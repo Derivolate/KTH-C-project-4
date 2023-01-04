@@ -12,19 +12,20 @@ class GridFunction {
         // GridFunction& operator=(const GridFunction&) = default;   //Assignment operator
 
         GridFunction(std::shared_ptr<Domain>);
-
-        GridFunction& operator+=(const GridFunction&) const;  //Pointwise grid addition assignment operator
+        GridFunction(GridFunction const &);
+        GridFunction& operator+=(const GridFunction&);  //Pointwise grid addition assignment operator
         // GridFunction& operator+(const GridFunction&) const;  //Pointwise grid addition operator
-        GridFunction& operator*=(const GridFunction&) const;  //Pointwise grid multiplication assignment operator
+        GridFunction& operator*=(const GridFunction&);  //Pointwise grid multiplication assignment operator
         // GridFunction& operator*(const GridFunction&) const;  //Pointwise grid multiplication operator
+        GridFunction operator+(const GridFunction&);
         
-        GridFunction Dx();    //X derivative
+        GridFunction Dx();    //X derivatives
         GridFunction Dy();    //Y derivative
-        GridFunction Grad();  //Gradient function
+        GridFunction DDxy(GridFunction * Dx, GridFunction * Dy);  //Laplace function
         
-        static GridFunction& Grad(const GridFunction&, const GridFunction&); //Overloaded option for the gradient in case the derivatives in X and Y are already available
         void printFkt(std::string) const;
         void fillGrid();
+
     private:
         std::shared_ptr<Domain> domain;
         Matrix u;
@@ -34,7 +35,6 @@ class GridFunction {
 
         template<int dx, int dy> double center_(int i, int j, Matrix const & fctn);
         template<int dx, int dy> double assym_(int i, int j, Matrix const & fctn);
-
         template<int dx, int dy> double face_(int i, int j);
         template<int dx, int dy, int dxi, int deta> double vertex_(int i, int j);
         template<int dx, int dy, int dxi, int deta> double edge_(int i, int j);
@@ -59,43 +59,38 @@ template<int dx, int dy> double GridFunction::assym_(int i, int j, Matrix const 
 }
 
 template<int dx, int dy, int dxi, int deta> double GridFunction::vertex_(int i, int j){
-    double dudxi, dudeta, dphixdxi, dphiydxi, dphixdeta, dphiydeta, detJ;
-    dudeta = assym_<0,deta>(i,j, u);
-    dudxi = assym_<dxi,0>(i,j, u);
-    dphixdxi = assym_<dxi,0>(i,j, phix);
-    dphiydxi = assym_<dxi,0>(i,j, phiy);
-    dphixdeta = assym_<0,deta>(i,j, phix);
-    dphiydeta = assym_<0,deta>(i,j, phiy);
-    detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
-    std::cout << "Vertex Element: [" << i << "," << j << "] direction: dxi,deta [" << dxi << "," << deta << "]" << std::endl;
-    std::cout << "dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
-    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta));
+    double const dudeta = assym_<0,deta>(i,j, u);
+    double const dudxi = assym_<dxi,0>(i,j, u);
+    double const dphixdxi = assym_<dxi,0>(i,j, phix);
+    double const dphiydxi = assym_<dxi,0>(i,j, phiy);
+    double const dphixdeta = assym_<0,deta>(i,j, phix);
+    double const dphiydeta = assym_<0,deta>(i,j, phiy);
+    double const detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+    // std::cout << "Vertex Element: [" << i << "," << j << "] direction: dxi,deta [" << dxi << "," << deta << "]" << std::endl;
+    // std::cout << "dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
+    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphixdxi - dudxi*dphixdeta));
 }
 
 template<int dx, int dy, int dxi, int deta> double GridFunction::edge_(int i, int j){
-    double dudxi, dudeta, dphixdxi, dphiydxi, dphixdeta, dphiydeta, detJ;
-    dudeta = assym_<0,deta>(i,j,u) * abs(deta) + center_<0,1>(i,j,u) * (1-abs(deta));
-    dudxi = assym_<dxi,0>(i,j, u)*abs(dxi) + center_<1,0>(i,j,u)* (1-abs(dxi));
-    dphixdxi = assym_<dxi,0>(i,j, phix) * abs(dxi) + center_<1,0>(i,j, phix)* (1-abs(dxi));
-    dphiydxi = assym_<dxi,0>(i,j, phiy) * abs(dxi) + center_<1,0>(i,j, phiy)* (1-abs(dxi));
-    dphixdeta = assym_<0,deta>(i,j, phix)* abs(deta) + center_<0,1>(i,j, phix)* (1-abs(deta));
-    dphiydeta = assym_<0,deta>(i,j, phiy)* abs(deta) + center_<0,1>(i,j, phiy)* (1-abs(deta));
-    detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
-    std::cout << "Edge Element: [" << i << "," << j << "] direction: dxi,deta [" << dxi << "," << deta << "]" << std::endl;
-    std::cout << "dphixdxi: " << dphixdxi << " dphiydeta: " << dphiydeta << " dphixdeta: " << dphixdeta << " dphiydxi: "<< dphiydxi  << " detJ: " << detJ << std::endl;
-    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta));
+    double const dudeta = assym_<0,deta>(i,j,u) * abs(deta) + center_<0,1>(i,j,u) * (1-abs(deta));
+    double const dudxi = assym_<dxi,0>(i,j, u)*abs(dxi) + center_<1,0>(i,j,u)* (1-abs(dxi));
+    double const dphixdxi = assym_<dxi,0>(i,j, phix) * abs(dxi) + center_<1,0>(i,j, phix)* (1-abs(dxi));
+    double const dphiydxi = assym_<dxi,0>(i,j, phiy) * abs(dxi) + center_<1,0>(i,j, phiy)* (1-abs(dxi));
+    double const dphixdeta = assym_<0,deta>(i,j, phix)* abs(deta) + center_<0,1>(i,j, phix)* (1-abs(deta));
+    double const dphiydeta = assym_<0,deta>(i,j, phiy)* abs(deta) + center_<0,1>(i,j, phiy)* (1-abs(deta));
+    double const detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphixdxi - dudxi*dphixdeta));
 }
 
 template<int dx, int dy> double GridFunction::face_(int i, int j){
-    double dudxi, dudeta, dphixdxi, dphiydxi, dphixdeta, dphiydeta, detJ;
-    dudeta = center_<0,1>(i,j, u);
-    dudxi = center_<1,0>(i,j, u);
-    dphixdxi = center_<1,0>(i,j, phix);
-    dphiydxi = center_<1,0>(i,j, phiy);
-    dphixdeta = center_<0,1>(i,j, phix);
-    dphiydeta = center_<0,1>(i,j, phiy);
-    detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
-    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphiydxi - dudxi*dphiydeta));  
+    double const dudeta = center_<0,1>(i,j, u);
+    double const dudxi = center_<1,0>(i,j, u);
+    double const dphixdxi = center_<1,0>(i,j, phix);
+    double const dphiydxi = center_<1,0>(i,j, phiy);
+    double const dphixdeta = center_<0,1>(i,j, phix);
+    double const dphiydeta = center_<0,1>(i,j, phiy);
+    double const detJ = dphixdxi * dphiydeta - dphixdeta*dphiydxi;
+    return (1/detJ) * (dx*(dudxi*dphiydeta - dudeta*dphiydxi)+dy*(dudeta*dphixdxi - dudxi*dphixdeta));
 }
 
 // template<int dx, int dy> double GridFunction::center_(int i, int j){

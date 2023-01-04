@@ -110,11 +110,12 @@ void Domain::generateGrid(int m, int n, int c = 1){
 
 void Domain::printGrid(bool bin, bool ascii, bool term, std::string path) const{
 	std::ofstream strm("domain_out.txt");
+	std::cout <<"----------------------------" << size.X() << ' ' << size.Y() << std::endl;
 	if (term)
 	{
-		for(int j(0); j<size.Y(); ++j){
-			for(int i(0); i<size.X(); ++i){
-				std::cout << "(" << grid[i+size.Y()*j].X() << "," << grid[i+size.Y()*j].Y() << ")\t";
+		for(int i(size.X()); i--;){
+			for(int j(0); j<size.Y(); ++j){
+				std::cout << "(" << grid[i+size.X()*j].X() << "," << grid[i+size.X()*j].Y() << ")\t";
 			}
 			std::cout << std::endl;
 		}

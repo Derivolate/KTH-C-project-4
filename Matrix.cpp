@@ -4,10 +4,10 @@
 
 Matrix::Matrix() : size(Point<int>(-1,-1)),elems(nullptr){}
 
-Matrix::Matrix(int m, int n) :Matrix(Point<int>(m,n!=-1?n:m)) {}
+Matrix::Matrix(int m, int n) : Matrix(Point<int>(m,n!=-1?n:m)){}
 
 Matrix::~Matrix(){
-    if(getm()>0 || getn()>0)
+    if(elems != nullptr)
     {
         delete[]elems;
     }
@@ -45,7 +45,7 @@ Matrix& Matrix::operator=(const Matrix& M) {
     return *this; // dereferencing!
 }
 
-Matrix& Matrix::operator+=(const Matrix& M) {
+Matrix& Matrix::operator+=(const Matrix& M) { //TODO: Faster would be adding the elems of the matricies
     if(size==M.size){
         for (int j(0); j < getn(); ++j)
             for (int i(0); i < getm(); ++i)
@@ -129,7 +129,7 @@ void Matrix::setElem(double val ,int i, int j){
 }
 
 void Matrix::printMatrix() const { 
-    cout << endl;
+    cout << getm() << ' ' << getn() << endl;
     for (int i(0); i < getm(); ++i){
         for (int j(0); j < getn(); ++j){
             cout << elems[i + j*getm()] <<" ";
@@ -155,9 +155,9 @@ Point<int> Matrix::getSize() const{
 }
 
 int Matrix::getm() const{
-    return (int)size.Y();
+    return (int)size.X();
 }
 
 int Matrix::getn() const{
-    return (int)size.X();
+    return (int)size.Y();
 }
