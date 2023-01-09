@@ -8,3 +8,8 @@ outfileY.bin
 Main.dSYM/Contents/Info.plist
 Main
 .vscode/settings.json
+domain_out.txt
+GridFunction
+GridFunction.dSYM/Contents/Info.plist
+Matrix
+Matrix.dSYM/Contents/Info.plist

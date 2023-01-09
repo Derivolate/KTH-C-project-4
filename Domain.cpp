@@ -5,6 +5,7 @@
 #include <string>
 #include "Domain.hpp"
 #include "Curvebase.hpp"
+#include "Matrix.hpp"
 
 Domain::Domain(Curvebase& s1, Curvebase& s2, Curvebase& s3, Curvebase& s4, double tol) : size(-1), grid(nullptr){
 	sides[0] = &s1;
@@ -21,6 +22,7 @@ Domain::~Domain() {
 	if (size.X() > 0 || size.Y() >0) {
 		delete [] grid;
 	}
+	// delete [] Seta;
 }
 
 Domain::Domain(const Domain& D) : size(D.getSize()){
@@ -37,6 +39,7 @@ Domain::Domain(const Domain& D) : size(D.getSize()){
 	{
 		sides[ind]=D.sides[ind];
 	}
+	Seta = D.Seta;
 }
 
 Domain& Domain::operator=(Domain& D){
@@ -55,11 +58,16 @@ Domain& Domain::operator=(Domain& D){
 			sides[ind]=D.sides[ind];
 		}
     }
+	Seta = D.Seta;
     return *this; // dereferencing!
 }
 
 Point<int> Domain::getSize() const {return size;}
 Point<double>* Domain::getGrid() const {return grid;}
+double Domain::getSeta(int i, int j) const {
+if (Seta!=nullptr) return Seta[i+j*size.X()];
+else return 0;
+}
 
 inline double Domain::phi1(double q){return 1-q;}
 inline double Domain::phi2(double q){return q;}
@@ -72,7 +80,7 @@ void Domain::generateGrid(int m, int n, int c = 1){
 	if (size.X() > 0 || size.Y() >0) { //if previous grid exists, reset grid points
 		delete [] grid;
 	}
-
+	Seta = new double[m*n];
 	size = Point<int>(m,n);
 	grid = new Point<double>[size.X()*size.Y()];
 	
@@ -86,10 +94,12 @@ void Domain::generateGrid(int m, int n, int c = 1){
 			if (c == 1) { // equidistant s
 				xi = j*hj;
 				nu = i*hi;
+				Seta[i+j*m] = nu;
 			} 
 			else if (c==2) { // stretched s
 				xi = j*hj;
 				nu = 1+(tanh(3*((i*hi)-1)))/tanh(3);
+				Seta[i+j*m] = nu;
 			} 
 
 			grid[i+j*m] = Point<double>(phi1(xi)*sides[3]->x(nu)+phi2(xi)*sides[1]->x(nu)

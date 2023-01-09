@@ -4,6 +4,7 @@
 #include "Curvebase.hpp"
 #include <string>
 #include "Point.hpp"
+#include "Matrix.hpp"
 
 class Domain{
 	public:
@@ -17,11 +18,17 @@ class Domain{
 		void printGrid(bool,bool,bool,std::string ="") const;
 		Point<double>* getGrid() const;
 		Point<int> getSize() const;	
+		double getSeta(int, int) const;
+		
+		
 	private:
 		Curvebase * sides[4]; //TODO implement smart pointer
 		Point<double> * grid = nullptr;
+		double * Seta = nullptr;
         // double * x_ = nullptr, * y_ = nullptr;
 		Point<int> size;
+		
+		
         // int n_ = 0, m_ = 0;
 		double tol;
 		double phi1(double); //transition function for grid generation phix(0) = 1, phix(1) = 0

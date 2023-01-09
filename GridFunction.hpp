@@ -1,5 +1,6 @@
 #ifndef GRIDFUNCTION_HPP
 #define GRIDFUNCTION_HPP
+#include <cmath>
 #include "Matrix.hpp"
 #include "Domain.hpp"
 #include <memory>
@@ -47,15 +48,18 @@ class GridFunction {
 // ----------------------------------
 
 template<int dx, int dy> double GridFunction::center_(int i, int j, Matrix const & fctn) {
+    std::cout << "TEMP SETA" << std::endl;
     if (!(dx || dy)){return 0;}
-    double const d = dy/(domain->getSize().X()-1.0) + dx/(domain->getSize().Y()-1.0);
-    return(fctn.getElem(i+dy,j+dx) - fctn.getElem(i-dy,j-dx))/(2*d);
+    double const d = dy*std::fabs(domain->getSeta(i-dy,j)-domain->getSeta(i+dy,j)) + 2*dx/(domain->getSize().Y()-1.0);
+    // double const d = dy/(domain->getSize().X()-1.0) + dx/(domain->getSize().Y()-1.0);
+    return(fctn.getElem(i+dy,j+dx) - fctn.getElem(i-dy,j-dx))/d;
 }
 
 template<int dx, int dy> double GridFunction::assym_(int i, int j, Matrix const & fctn) {
     if (!(dx || dy)){return 0;}
-    double const d = dy/(domain->getSize().X()-1.0) + dx/(domain->getSize().Y()-1.0);
-    return(fctn.getElem(i+2*dy,j+2*dx) - 4*fctn.getElem(i+dy,j+dx) + 3*fctn.getElem(i,j))/(3*d);
+    double const d = 0.5*dy*std::fabs(domain->getSeta(i+2*dy,j)-domain->getSeta(i,j)) + dx/(domain->getSize().Y()-1.0);
+    // double const d = dy/(domain->getSize().X()-1.0) + dx/(domain->getSize().Y()-1.0);
+    return (fctn.getElem(i+2*dy,j+2*dx) - 4*fctn.getElem(i+dy,j+dx) + 3*fctn.getElem(i,j))/(3*d);
 }
 
 template<int dx, int dy, int dxi, int deta> double GridFunction::vertex_(int i, int j){
