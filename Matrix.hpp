@@ -19,11 +19,9 @@ class Matrix {
         Matrix& operator=(const Matrix&);       //Assignment operator
         Matrix& operator+=(const Matrix&);      //Element wise addition Assignment
         Matrix operator+(const Matrix&)const;   //Element wise addition
-        Matrix& operator*=(const Matrix&);      //Matrix product assignment
         Matrix& operator%=(const Matrix&);      //Matrix element-wise product assignment
         Matrix& operator*=(const double);       //Scalar product assignment
         Matrix operator*(const double)const;    //Matrix product
-        Matrix Mexp(int)const;                  //Matrix exponent function
         double operator()(int, int) const;      //Indexing
         void setElem(double,int,int); //et an element
         double getElem(int, int) const;

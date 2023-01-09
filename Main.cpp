@@ -11,19 +11,8 @@
 
 using namespace std;
 
-int main(int argc, char **argv)
-{
-
-    // double ox(0),oy(0),width(2), height(2);
-    
-    // // BumpedCurve border1 = BumpedCurve(0,1,true,ox,oy,width,-6,0,3,3,0.5);
-    // Hline border1 = Hline(0,1,true,ox,oy,width);
-    // Vline border2 = Vline(0,1,true,ox+width,oy,height);
-    // Hline border3 = Hline(0,1,true,ox,oy+height,height);
-    // Vline border4 = Vline(0,1,true,ox,oy,height);
-
+int main(int argc, char **argv){
     double ox(-10),oy(0),width(15), height(3);
-    // Hline border1 = Hline(0,1,true,ox,oy,width);
     
     BumpedCurve border1 = BumpedCurve(0,1,true,ox,oy,width,-6,0,3,3,0.5);
     Vline border2 = Vline(0,1,true,ox+width,oy,height);

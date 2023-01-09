@@ -22,14 +22,11 @@ class Domain{
 		
 		
 	private:
-		Curvebase * sides[4]; //TODO implement smart pointer
+		Curvebase * sides[4];
 		Point<double> * grid = nullptr;
 		double * Seta = nullptr;
-        // double * x_ = nullptr, * y_ = nullptr;
 		Point<int> size;
 		
-		
-        // int n_ = 0, m_ = 0;
 		double tol;
 		double phi1(double); //transition function for grid generation phix(0) = 1, phix(1) = 0
 		double phi2(double); //transition function for grid generation phiy(1) = 1, phix(0) = 0

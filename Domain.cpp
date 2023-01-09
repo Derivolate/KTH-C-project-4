@@ -14,8 +14,6 @@ Domain::Domain(Curvebase& s1, Curvebase& s2, Curvebase& s3, Curvebase& s4, doubl
 	sides[3] = &s4;
 	for(int i = 0;i<4;++i)
 		sides[i]->set_tol(tol);
-	// size = Point(-1);
-	//grid = nullptr;
 }
 
 Domain::~Domain() {
@@ -131,11 +129,6 @@ void Domain::printGrid(bool bin, bool ascii, bool term, std::string path) const{
 		}
 	}
 	
-	// 	if (ascii)
-	// 		strm << "(" << grid[ind].X() << ",  " << grid[ind].Y() << ")" << std::endl;
-	// 	if (term)
-			
-	// }
 	if (bin){
 		std::cout << "PRINTING BIN FILE FOR COORDINATES" << std::endl;
 		FILE *fx, *fy;
