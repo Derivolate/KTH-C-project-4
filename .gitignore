@@ -13,3 +13,4 @@ GridFunction
 GridFunction.dSYM/Contents/Info.plist
 Matrix
 Matrix.dSYM/Contents/Info.plist
+*.bin

@@ -24,8 +24,6 @@ int main(int argc, char **argv){
     
     std::shared_ptr<Domain> domain_ptr= std::make_shared<Domain>(domain);
     std::cout << "SETA " <<  domain.getSeta(0,2) << std::endl;
-   
-
 
     GridFunction Fkt = GridFunction(domain_ptr);
     

@@ -7,17 +7,10 @@
 
 class GridFunction {
     public:
-        //Smart pointer can take care on its own of proper copying and deletion. Rule of 0 applies
-        // GridFunction(const GridFunction&) = default;
-        // ~GridFunction() = default;
-        // GridFunction& operator=(const GridFunction&) = default;   //Assignment operator
-
         GridFunction(std::shared_ptr<Domain>);
         GridFunction(GridFunction const &);
         GridFunction& operator+=(const GridFunction&);  //Pointwise grid addition assignment operator
-        // GridFunction& operator+(const GridFunction&) const;  //Pointwise grid addition operator
         GridFunction& operator*=(const GridFunction&);  //Pointwise grid multiplication assignment operator
-        // GridFunction& operator*(const GridFunction&) const;  //Pointwise grid multiplication operator
         GridFunction operator+(const GridFunction&);
         
         GridFunction Dx();    //X derivatives
@@ -40,10 +33,6 @@ class GridFunction {
         template<int dx, int dy> double face_(int i, int j);
         template<int dx, int dy, int dxi, int deta> double vertex_(int i, int j);
         template<int dx, int dy, int dxi, int deta> double edge_(int i, int j);
-
-
-        // TODO template<int dx, int dy> double ghost_(int i, int j);
-
 }; 
 
 // ----------------------------------

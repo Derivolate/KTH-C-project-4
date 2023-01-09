@@ -19,8 +19,6 @@ double Curvebase::integrate(double p) {
     return ASI_routine(a,b,c,tollerance,fa,fb,fc,I);
 }
 
-
-
 double Curvebase::ASI_routine(double a, double b, double  c, double tol, double fa, double fb, double fc, double I1){
     //Calculate the midpoints
     double ab((a+b)/2), bc((b+c)/2);

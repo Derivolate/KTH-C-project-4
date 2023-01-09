@@ -47,7 +47,6 @@ void GridFunction::fillGrid(){
             phiy.setElem(coord.Y(),i,j);
         }
     }
-    std::cout << "------- PHIX AND PHIY -------" << std::endl;
     phix.printMatrix();
     phiy.printMatrix();
 }
@@ -57,13 +56,11 @@ GridFunction GridFunction::Dx() {
     int m(u.getSize().X()), n(u.getSize().Y());
     GridFunction grdfktn(*this);
     // corners
-    std::cout<<"====== CORNERS DX ======" << std::endl;
     grdfktn.u.setElem(vertex_<1,0,1,1>(0,0),0,0);
     grdfktn.u.setElem(vertex_<1,0,-1,1>(0,n-1),0,n-1);
     grdfktn.u.setElem(vertex_<1,0,1,-1>(m-1,0),m-1,0);
     grdfktn.u.setElem(vertex_<1,0,-1,-1>(m-1,n-1),m-1,n-1);
     // boundary 1 and 3
-    std::cout<<"====== BOUNDARIES ======" << std::endl;
     for(int i(1); i < m-1; i++){
         grdfktn.u.setElem(edge_<1,0,1,0>(i,0),i,0); 
         grdfktn.u.setElem(edge_<1,0,-1,0>(i,n-1),i,n-1); 
@@ -72,7 +69,6 @@ GridFunction GridFunction::Dx() {
         grdfktn.u.setElem(edge_<1,0,0,1>(0,j),0,j);
         grdfktn.u.setElem(edge_<1,0,0,-1>(m-1,j),m-1,j);
     }
-    std::cout<<"====== REST DX ======" << std::endl;
     for(int i(1); i < m-1; i++){  
               for(int j(1); j < n-1; j++){
                     grdfktn.u.setElem(face_<1,0>(i,j),i,j);
@@ -85,13 +81,11 @@ GridFunction GridFunction::Dy() {
     int m(u.getSize().X()), n(u.getSize().Y());
     GridFunction grdfktn(*this);
     // corners
-    std::cout<<"====== CORNERS DY ======" << std::endl;
     grdfktn.u.setElem(vertex_<0,1,1,1>(0,0),0,0);
     grdfktn.u.setElem(vertex_<0,1,-1,1>(0,n-1),0,n-1);
     grdfktn.u.setElem(vertex_<0,1,1,-1>(m-1,0),m-1,0);
     grdfktn.u.setElem(vertex_<0,1,-1,-1>(m-1,n-1),m-1,n-1);
     // boundary 1 and 3
-    std::cout<<"====== BOUNDARIES ======" << std::endl;
     for(int i(1); i<m-1; i++){
         grdfktn.u.setElem(edge_<0,1,1,0>(i,0),i,0); 
         grdfktn.u.setElem(edge_<0,1,-1,0>(i,n-1),i,n-1); 
@@ -100,10 +94,9 @@ GridFunction GridFunction::Dy() {
         grdfktn.u.setElem(edge_<0,1,0,1>(0,j),0,j);
         grdfktn.u.setElem(edge_<0,1,0,-1>(m-1,j),m-1,j);
     }
-    std::cout<<"====== REST DY ======" << std::endl;
     for(int i(1); i < m-1; i++){  
-              for(int j(1); j < n-1; j++){
-                    grdfktn.u.setElem(face_<0,1>(i,j),i,j);
+        for(int j(1); j < n-1; j++){
+            grdfktn.u.setElem(face_<0,1>(i,j),i,j);
         }
     }
     return(grdfktn);
