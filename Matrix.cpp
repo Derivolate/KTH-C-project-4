@@ -4,7 +4,7 @@
 
 Matrix::Matrix() : size(Point<int>(-1,-1)),elems(nullptr){}
 
-Matrix::Matrix(int m, int n=-1) : Matrix(Point<int>(m,n!=-1?n:m)){} //Initialise a square matrix if no value of n is provided
+Matrix::Matrix(int m, int n) : Matrix(Point<int>(m,n!=-1?n:m)){} //Initialise a square matrix if no value of n is provided
 
 Matrix::~Matrix(){
     if(elems != nullptr)

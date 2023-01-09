@@ -52,6 +52,7 @@ void GridFunction::fillGrid(){
     phiy.printMatrix();
 }
 
+// Derivative in X direction returning new GridFunction Object with Derivatives
 GridFunction GridFunction::Dx() {
     int m(u.getSize().X()), n(u.getSize().Y());
     GridFunction grdfktn(*this);
@@ -108,6 +109,7 @@ GridFunction GridFunction::Dy() {
     return(grdfktn);
 }
 
+// TODO: Implement Stensil Calculation of Laplacian. For now this suffices
 GridFunction GridFunction::DDxy(GridFunction* Dx, GridFunction* Dy) {
     // TODO Write check if Dx and Dy come from the same domain and original gridfunction
     return(Dx->Dx() + Dy->Dy());
@@ -116,5 +118,4 @@ GridFunction GridFunction::DDxy(GridFunction* Dx, GridFunction* Dy) {
 double GridFunction::u_function(Point<double> p){
     double x(p.X()),y(p.Y());
     return(sin(pow(x/10,2))*cos(x/10)+y);
-    //return(x*x);
 }

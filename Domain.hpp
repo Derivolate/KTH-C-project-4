@@ -24,7 +24,8 @@ class Domain{
 	private:
 		Curvebase * sides[4];
 		Point<double> * grid = nullptr;
-		double * Seta = nullptr;
+		// TODO: Implement generalized S, currently only eta change needed and implemented
+		double * Seta = nullptr; // Saving eta values of S space coordinates (necessary for calculating derivative "distances" in non uniform grid case) 
 		Point<int> size;
 		
 		double tol;
